@@ -1,0 +1,36 @@
+version: "3.1"
+services:
+  mariadb:
+    image: mariadb:10.4
+    container_name: con-vm-app-mariadb
+    working_dir: /app
+    volumes:
+      - .:/app
+    environment:
+      - MYSQL_ROOT_PASSWORD=YOUR_DB_PASS
+      - MYSQL_DATABASE=YOUR_DB_NAME
+      - MYSQL_USER=YOUR_DB_USER
+      - MYSQL_PASSWORD=YOUR_DB_PASS
+    ports:
+      - "1028:3306"
+
+  webserver:
+    image: nginx:alpine
+    container_name: con-vm-app-webserver
+    working_dir: /app
+    volumes:
+      - .:/app
+      - ./docker/nginx/app/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./docker/nginx/app/general.conf:/etc/nginx/conf.d/general.conf
+      - ./docker/nginx/app/php_fastcgi.conf:/etc/nginx/conf.d/php_fastcgi.conf
+      - ./docker/nginx/app/security.conf:/etc/nginx/conf.d/security.conf
+    ports:
+      - "1025:80"
+
+  php-fpm:
+    build: docker/php-fpm
+    container_name: con-vm-app-php-fpm
+    working_dir: /app
+    volumes:
+      - .:/app
+      - ./docker/php-fpm/php-ini-overrides.ini:/etc/php/7.4/fpm/conf.d/99-overrides.ini
